@@ -1,4 +1,5 @@
 use std::time::Instant;
+use std::io::Write as IoWrite;
 use sha2::{Digest, Sha256};
 use ed25519_dalek::{SigningKey, Signer};
 use rand::{rngs::OsRng, Rng};
@@ -73,6 +74,9 @@ fn main() {
 
     let prover = default_prover();
     let mut rng = OsRng;
+
+    // CSV timing log: (guest, step, description, elapsed_secs)
+    let mut timing_log: Vec<(String, usize, String, f64)> = Vec::new();
 
     const N: usize = 10_000;    // total queries in Q
     const T: usize = 5;         // number of challenge sets
@@ -203,7 +207,9 @@ fn main() {
         .prove_with_opts(env_a, GUEST_A_ELF, &ProverOpts::succinct())
         .unwrap()
         .receipt;
-    println!("[host] Guest A proof time: {:.2?}", t_a.elapsed());
+    let elapsed_a = t_a.elapsed();
+    println!("[host] Guest A proof time: {:.2?}", elapsed_a);
+    timing_log.push(("guest-a".into(), 0, "Open(C_B) Open(C_tau) MerkleVerify(R_sets) F1<tau".into(), elapsed_a.as_secs_f64()));
 
     let jb = &receipt_a.journal.bytes;
     let f1_num_out = u32::from_le_bytes(jb[100..104].try_into().unwrap());
@@ -268,7 +274,14 @@ fn main() {
             .prove_with_opts(env_b, GUEST_B_ELF, &ProverOpts::succinct())
             .unwrap()
             .receipt;
-        println!("[host] Guest B step {} proof time: {:.2?}", step, t_b.elapsed());
+        let elapsed_b = t_b.elapsed();
+        println!("[host] Guest B step {} proof time: {:.2?}", step, elapsed_b);
+        timing_log.push((
+            "guest-b".into(),
+            step,
+            format!("IVC step {} query_idx={}{}", step, j, if is_final { " [final+Open(C_A)]" } else { "" }),
+            elapsed_b.as_secs_f64(),
+        ));
 
         prev_journal = receipt_b.journal.bytes.clone();
         prev_receipt = Some(receipt_b);
@@ -307,8 +320,22 @@ fn main() {
         .join()
         .unwrap();
 
-    println!("[host] Recursive Guest proof time: {:.2?}", t_rec.elapsed());
+    let elapsed_rec = t_rec.elapsed();
+    println!("[host] Recursive Guest proof time: {:.2?}", elapsed_rec);
+    timing_log.push(("recursive-guest".into(), 0, "Groth16 aggregation guest-a + guest-b".into(), elapsed_rec.as_secs_f64()));
     final_receipt.verify(RECURSIVE_GUEST_ID).unwrap();
     println!("[host] Complaint proof verified successfully!");
     println!("[host] Final journal (SHA-256 of A||B journals): {:?}", final_receipt.journal.bytes);
+
+    // ── Write timing results to CSV ───────────────────────────────────────────
+    let csv_path = "proof_times.csv";
+    let mut file = std::fs::File::create(csv_path).expect("cannot create proof_times.csv");
+    writeln!(file, "guest,step,description,time_secs").unwrap();
+    for (guest, step, desc, secs) in &timing_log {
+        writeln!(file, "{},{},{},{:.4}", guest, step, desc, secs).unwrap();
+    }
+    let total: f64 = timing_log.iter().map(|(_, _, _, s)| s).sum();
+    writeln!(file, "TOTAL,,,{:.4}", total).unwrap();
+    println!("[host] Timing results saved to {} (total: {:.2?})", csv_path,
+        std::time::Duration::from_secs_f64(total));
 }

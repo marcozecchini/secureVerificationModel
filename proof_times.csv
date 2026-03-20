@@ -1,0 +1,24 @@
+guest,step,description,time_secs
+guest-a,0,Open(C_B) Open(C_tau) MerkleVerify(R_sets) F1<tau,6.7508
+guest-b,0,IVC step 0 query_idx=20,20.9705
+guest-b,1,IVC step 1 query_idx=21,21.6358
+guest-b,2,IVC step 2 query_idx=22,21.7517
+guest-b,3,IVC step 3 query_idx=23,21.2352
+guest-b,4,IVC step 4 query_idx=24,21.4247
+guest-b,5,IVC step 5 query_idx=25,21.5560
+guest-b,6,IVC step 6 query_idx=26,21.4544
+guest-b,7,IVC step 7 query_idx=27,21.5162
+guest-b,8,IVC step 8 query_idx=28,21.4309
+guest-b,9,IVC step 9 query_idx=29,21.5937
+guest-b,10,IVC step 10 query_idx=30,21.6019
+guest-b,11,IVC step 11 query_idx=31,21.6295
+guest-b,12,IVC step 12 query_idx=32,21.7981
+guest-b,13,IVC step 13 query_idx=33,21.6644
+guest-b,14,IVC step 14 query_idx=34,21.7392
+guest-b,15,IVC step 15 query_idx=35,21.4674
+guest-b,16,IVC step 16 query_idx=36,21.7631
+guest-b,17,IVC step 17 query_idx=37,21.4928
+guest-b,18,IVC step 18 query_idx=38,21.4393
+guest-b,19,IVC step 19 query_idx=39 [final+Open(C_A)],21.6314
+recursive-guest,0,Groth16 aggregation guest-a + guest-b,26.1502
+TOTAL,,,463.6971
