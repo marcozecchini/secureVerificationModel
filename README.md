@@ -118,14 +118,9 @@ cargo run --release -p host
 RUST_LOG=info RISC0_DEV_MODE=1 cargo run -p host
 ```
 
-### Groth16 via Bonsai (remote proving service)
+### Groth16 
 
 The final recursive proof uses `ProverOpts::groth16()`. To offload it to Bonsai:
-
-```bash
-BONSAI_API_KEY="<your-key>" BONSAI_API_URL="https://api.bonsai.xyz" \
-  cargo run --release -p host
-```
 
 > With `RISC0_DEV_MODE=1` the Groth16 step is simulated without a real proof.
 
