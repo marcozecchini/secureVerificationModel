@@ -1,0 +1,19 @@
+# Build artifacts (6+ GB)
+target/
+
+# Guest Cargo lock files
+methods/*/Cargo.lock
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor artifacts
+.vscode/
+*.swp
+*.swo
+
+# Secrets / credentials
+.env
+*.pem
+*.key
